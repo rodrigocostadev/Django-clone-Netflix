@@ -1,0 +1,22 @@
+python -m venv venvRodrigo             instala a venv
+.\venvRodrigo\Scripts\activate         ativa a venv
+pip install django                     instala o django
+django-admin startproject hashflix .   cria a estrutura inicial do projeto ou app django
+django-admin startapp filme            cria o app filme dentro da sua pasta principal     (NÃO COLOCAR O NOME NO PLURAL)
+python manage.py runserver             cria um link
+
+python manage.py makemigrations        cria novas migrações com base em alterações feitas
+python manage.py migrate               esse comando é usado para aplicar as migrações no banco de dados, ele atualiza as alterações
+
+na pasta hashflix, colocar o nome do app 'filme' no arquivo settings na seção INSTALLED_APPS = [ ... ]
+
+na pasta hashflix, dentro do arquivo urls inicialmente é assim:
+    urlpatterns = [
+    path('admin/', admin.site.urls),
+]
+
+    criar um arquivo urls.py na pasta Filmes
+
+    
+
+*** estava na parte de django-admin startapp
