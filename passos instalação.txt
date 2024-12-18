@@ -8,6 +8,8 @@ python manage.py runserver             cria um link
 python manage.py makemigrations        cria novas migrações com base em alterações feitas
 python manage.py migrate               esse comando é usado para aplicar as migrações no banco de dados, ele atualiza as alterações
 
+python manage.py createsuperuser       comando para criar um admin, informando o nome de usuário, email, e senha
+
 na pasta hashflix, colocar o nome do app 'filme' no arquivo settings na seção INSTALLED_APPS = [ ... ]
 
 na pasta hashflix, dentro do arquivo urls inicialmente é assim:
@@ -20,3 +22,14 @@ na pasta hashflix, dentro do arquivo urls inicialmente é assim:
     
 
 *** estava na parte de django-admin startapp
+
+
+
+
+
+
+
+Usuário (leave blank to use 'rodrigo.costa'): rodrigo
+Endereço de email: rodrigo.costa94@yahoo.com.br
+Password: rodrigo
+Password (again):  rodrigo
