@@ -19,17 +19,13 @@ na pasta hashflix, dentro do arquivo urls inicialmente é assim:
 
     criar um arquivo urls.py na pasta Filmes
 
-    
-
-*** estava na parte de django-admin startapp
-
-
-
-
-
-
 
 Usuário (leave blank to use 'rodrigo.costa'): rodrigo
 Endereço de email: rodrigo.costa94@yahoo.com.br
 Password: rodrigo
 Password (again):  rodrigo
+
+
+quando for criar as paginas do site vão ser criadas 3 coisas: URL VIEW e TEMPLATE     
+(VIEW é o código em python que vai dizer o que vai acontecer quando a pessoa entrar naquele link, Ex: puxar alguma coisa do banco de dados para ser exibido )
+(TEMPLATE é a parte visual, são os arquivos em html que eu vou querer subir)

@@ -55,7 +55,7 @@ ROOT_URLCONF = 'hashflix.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -116,7 +116,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+# STATIC = SÃO AS IMAGENS ESTÁTICAS QUE EU ( CRIADOR DO SITE ) VOU SUBIR
+# MEDIAS =  SÃO AS IMAGENS QUE O ( USUÁRIO ) VAI SUBIR
+STATIC_URL = 'static/'  
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    
+]
+
+MEDIA_URL = 'media/'
+
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

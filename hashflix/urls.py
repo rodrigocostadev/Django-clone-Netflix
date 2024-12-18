@@ -16,8 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+# from filme import views  # Importando a view 'home' da app 'filme'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('/', include('filme.urls'))
+    path('', include('filme.urls')),
+    # path('', views.home, name='home'),
 ]
+
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# essa variável foi definida em settings.py MEDIA URL        # essa variável foi definida em settings.py MEDIA ROOT
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
