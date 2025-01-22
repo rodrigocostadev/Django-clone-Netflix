@@ -1,0 +1,17 @@
+
+
+
+
+
+
+django-admin startproject hashflix .       "PONTO NO FINAL PARA CRIAR 1 PASTA E NÃO 2 PASTAS COM O MESMO NOME"
+
+python manage.py runserver
+
+django-admin startapp filme                "DEIXAR O NOME DO APP SEM A LETRA (S), DEIXAR NO SINGULAR MESMO"
+
+python manage.py makemigrations
+
+python manage.py migrate
+
+python manage.py createsuperuser
