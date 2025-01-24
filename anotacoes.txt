@@ -1,6 +1,6 @@
 
 
-===============================================================================
+=================================================================================================================================================================
 # Aula 6: Iniciando o Projeto e Estrutura Inicial do Django
 
 sempre que for criar um novo site em django:
@@ -10,7 +10,7 @@ sempre que for criar um novo site em django:
 
 === python manage.py runserver === esse comando cria um link para acessar o site
 
-===============================================================================
+=================================================================================================================================================================
 # Aula 7: Criando seu 1º app do site
 
 ao abrir o link do site, no navegador digitar admin para aparecer a tela de adm
@@ -27,7 +27,7 @@ falta ainda vincular o app com o projeto hashflix
     2- urls da pasta do projeto, pra garantir que os links do app vão aparecer dentro da pasta de urls da pasta projeto 
     3- models pra garantir que as tabelas que construir dentro do app vão aparecer na pagina de adm e vão estar criadas dentro do banco de dados  )
 
-===============================================================================
+=================================================================================================================================================================
 # Aula 8: Migrations e Criando um SuperUser
 
 Inicializando um usuário:
@@ -53,7 +53,7 @@ Criando um superUser (admin)
             Password (again): camile12 ...
 
 
-===============================================================================
+=================================================================================================================================================================
 # Aula 9: Conectando um app novo no seu projeto
 
 Depois que vc cria o app, a primeira coisa a fazer é instalar o app dentro dos aplicativos do projeto.
@@ -76,7 +76,7 @@ Depois que vc cria o app, a primeira coisa a fazer é instalar o app dentro dos 
     3- models pra garantir que as tabelas que construir dentro do app vão aparecer na pagina de adm e vão estar criadas dentro do banco de dados  )
 
 
-===============================================================================
+=================================================================================================================================================================
 Aula 11: Criando o modelo do Filme - Adicionar tabelas no Banco 
 
 nessa aula vamos contruir os nossos modelos, ou seja as tabelas onde vamos armazenar as informações dos filmes.
@@ -122,7 +122,7 @@ agora que criamos uma nova tabela no banco de dados, precisa fazer as migraçõe
  
 
 
-===============================================================================
+=================================================================================================================================================================
 # Aula 12: Adicionando o modelo do Filme no Administrador
 
 No arquivo admin do app filmes, digitar:
@@ -141,14 +141,14 @@ para alterar isso deve-se mexer na classe do filme, adicionando a função de st
             return self.titulo
 
 
-===============================================================================
+=================================================================================================================================================================
 # Aula 13: Configurando pastas static e media
 
 -Diferença entre STATIC e MEDIA:
     MEDIA: No instagram um usuário pode postar uma foto, essa foto postada é uma media
     STATIC: Uma foto ou imagem que eu criador do instagram subo para definir a logo do instagram é uma STATIC
 
--Definindo a pasta para os arquivos statics e medias:
+-Definindo a pasta para os arquivos statics e medias, ((( MAS PRIMEIRAMENTE STATIC ))):
     no site do django documentation, copiei o seguinte trecho de codigo:    
 
     STATICFILES_DIRS = [
@@ -187,8 +187,6 @@ para alterar isso deve-se mexer na classe do filme, adicionando a função de st
 
 
 
-
-
 -tudo vai ficar desse jeito:
 
     from django.contrib import admin
@@ -204,13 +202,695 @@ para alterar isso deve-se mexer na classe do filme, adicionando a função de st
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
+//////////////////////////////////////////////////
+((((  agora DEFININDO a parte de MEDIA  ))))
 
-((((  agora a parte de media  ))))
-
--adicionando ao arquivo urlpatterns da pasta do projeto "hashflix": 
-    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    -adicionando ao arquivo URLs da pasta do projeto "hashflix" o urlpatterns de "media": 
+            + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
-    8:30 aula 13
+        vai ficar desse jeito:
 
+
+            from django.contrib import admin
+            from django.urls import path, include
+            from django.conf import settings
+            from django.conf.urls.static import static
+
+            urlpatterns = [
+                path('admin/', admin.site.urls),
+                # path('/', include('filme.urls')),
+            ]
+
+            urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+            urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)   <=========== adicionado
+
+
+    Próximo passo é definir as variaveis MEDIA_URL e MEDIA_ROOT do ultimo trecho de codigo adicionado anteriormente ( urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) )
+    Para isso é preciso ir no arquivo settings da pasta do projeto "hashflix", e embaixo do STATICFILES_DIRS adicionar :
+
+        STATIC_URL = 'static/'
+
+        STATICFILES_DIRS = [
+                BASE_DIR / "static",
+                # "/var/www/static/",
+            ]
+
+        MEDIA_URL = 'media/'  <==== isso serve para quando o usuario clicar com o botao direito do mouse e abrir a imagem em uma nova guia, esse sera o endereço na barra de pesquisa
+
+        MEDIA_ROOT = BASE_DIR / "media" <===== definindo as pastas onde vai ficar as medias
+
+
+    Feito isso (definindo as pastas onde vai ficar as medias), criar uma nova pasta chamada de "media" no projeto principal 
+    (fora da pasta do projeto e de apps, na PASTA RAIZ, no caso na pasta Django clone netflix) assim como foi feito com pasta static anteriormente.
+
+        CRIAR PASTA "MEDIA" NA PASTA RAIZ DO PROJETO
+
+
+    Após isso, ir na pagina de adm, e adicionar uma imagem manualmente no app e clicar em salvar, 
+    isso fara com que agora a imagem seja salva na pasta thumb_filmes dentro da pasta media
+
+
+=================================================================================================================================================================
+# Aula 14: Criando uma página do nosso site
+
+- No arquivo urls.py da pasta do projeto "hasflix", descomentar a ultima linha, em include deixar "include('filme.urls')" e deixar o path vazio, 
+pois o app filmes vai gerenciar todo o projeto
+
+    urlpatterns = [
+        path('admin/', admin.site.urls),
+        path('', include('filme.urls')),    <============ ( o app filmes vai gerenciar todo o projeto, VAI SER A MINHA HOMEPAGE)
+    ]
+
+-Para cada pagina criada no site, é necessário sempre criar 3 coisas:
+    1 - URL <==== link onde a pagina vai aparecer
+    2 - VIEW <==== código em python que vai dizer o que vai acontecer qundo a pessoa acessar aquele link. ex: puxar algo do banco de dados para exibir , redirecionar para uma nova pagina
+    3 - TEMPLATE <==== parte visual, o html
+
+
+//////////////////////////////////////////////////
+((( configurando o url do app filmes  )))
+
+- no app filmes criar um arquivo urls.py
+
+- A forma que se configura o URL do app de filmes é a mesma forma que foi configurado o URL padrão do projeto principal "hashflix", 
+então pode copiar o codigo do arquivo urls.py e colar no arquivo 
+
+        from django.contrib import admin               <============ excluir
+        from django.urls import path, include
+        from django.conf import settings               <============ excluir
+        from django.conf.urls.static import static     <============ excluir
+
+        urlpatterns = [
+            path('admin/', admin.site.urls),           <============ excluir ( ja foi configurado )
+            path('', include('filme.urls')),
+        ]
+
+
+
+
+    vai ficar assim:
+
+        from django.urls import path, include
+
+        urlpatterns = [
+            path('', include('filme.urls')),
+        ]
+
+
+    agora apague o include e coloque homepage:
+
+        from django.urls import path, include
+        from .views import homepage             <============ adicionar importação
+
+        urlpatterns = [
+            path('', homepage),
+        ]
+
+
+- no arquivo view.py do app "filme" criar função homepage, essa função precisa receber o argumento request:
+
+    from django.shortcuts import render
+
+    # Create your views here.
+
+    def homepage(request):
+        return render(request, "homepage.html")  # <============ precisa ser passado 2 parametros, 1 - REQUEST, 2 - NOME DO TEMPLATE
+
+
+
+
+=================================================================================================================================================================
+
+# Aula 15: Criando seus templates e a estrutura de templates do site:
+
+- Na pasta do app "no caso filme", criar uma pasta chamada templates (essa vai ser a pagina de templates somente do app)
+
+- dentro dessa pasta templates que foi criado na pasta do app, criar um arquivo html, 
+que no caso foi criado com o nome "homepage.html" juntamente com a estrutura base em html ( usar o comando= ! + tab) junto com uma tag h1 "Essa é a homepage"
+
+-Após isso criar uma pagina templates só que na pagina raiz de todo o projeto, no caso a pasta django-clone-netflix
+
+
+=================================================================================================================================================================
+# Aula 16: Criando uma base em html e conectando aos templates
+
+- Na pasta templates da pasta raiz (pasta templates de fora ), criar 2 arquivos html juntamente com a sua estrutura base:
+    1- base.html
+    2- navbar.html
+
+- No arquivo base.html, mudar a tag title:
+    <title>
+        {% block titulo %}
+        {% endblock  %}
+    </title>
+
+- Na pasta templates do app filmes, ir no arquivo homepage.html e apagar toda a estrutura html feita anteriormente adicionando o seguinte:
+    {% extends 'base.html' %}
+
+- Extra:
+    em settings.py que esta na pasta do projeto "hashflix", ir em templates , e em dirs digitar 'template' dentro do colchetes, veja:
+
+        TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': ['templates'],                                          <============ Adicionar 'template' dentro do colchetes
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                ],
+            },
+        },
+    ]
+
+=================================================================================================================================================================
+# Aula 17: Criando o navbar e editando html com tailwind
+
+- O bootstrap vai ser utilizado tambem, mas apenas com formulários, isso devido ao bootstrap ja ter uma integração com o django
+- O tailwind será utilizado no restante do projeto
+
+- pegar cdn do tailwind e do bootstrap para adicionar ao projeto, adicionando ao fim do head da pagina base.html:
+
+        <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+        {% block head %}           <============ Adicionar bloco para adicionar scripts da pagina futuramente
+        {% endblock %}             <============ Adicionar bloco para adicionar scripts da pagina futuramente
+    </head> 
+
+- apagar a estrutura base em html do arquivo navbar.html
+
+
+
+
+
+
+
+
+
+
+
+
+=================================================================================================================================================================
+# Aula 20: Passando parâmetros para as páginas html - Context
+
+- como pegar informações do banco de dados e do django e inserir nas paginas? pra fazer isso é preciso passar um CONTEXT
+
+- CONTEXT é o contexto da pagina html especifica, o context é um dicionário python que voce vai criar dentro da view e passar como parametro pra pagina html,
+e esse parametro vai permitir que quando eu chegue na pagina html, eu possa usar tags em python pra carregar informações desse dicionario
+
+
+- como exemplo, criamos a view homefilmes. com a view homefilmes iremos mostrar os dados do banco de dados ao usuário. 
+Lembrando, para criar uma nova pagina é necessário criar a view / url / html.   veja como ficou a view:
+
+            from django.shortcuts import render
+            from .models import Filme                    # <============ Realizada a importação da classe Filme "que está em models" para ter acesso as informações do banco de dados
+
+            # criar: url - view - html
+
+            # Create your views here.
+
+            def homepage(request):
+                return render(request, "homepage.html")  # <============ precisa ser passado 2 parametros, 1 - REQUEST, 2 - NOME DO TEMPLATE
+
+
+            def homefilmes(request):
+                context = {}                                       # <============ context é um dicionário python
+                lista_filmes = Filme.objects.all()                 # <============ PEGANDO INFORMAÇÕES DO BANCO DE DADOS 
+                context['lista_filmes'] = lista_filmes             # <============ criei uma chave lista_filmes e estou atribuindo valor a essa chave
+                return render(request, "homefilmes.html", context) # <============ Na função render posso passar um novo parametro, que é o context
+
+
+- e no arquivo homefilmes fiz da seguinte forma:
+    {% extends 'base.html' %}
+
+    {% comment %} {% load static %} {% endcomment %}
+
+    {% block titulo %}
+        HomePage Hashflix
+    {% endblock %}
+
+    {% block content %}
+    <h1> Essa é a pagina Homefilmes </h1>
+
+    {{ lista_filmes }}                       # <============ ESSA É A CHAVE DE CONTEXT que anteriormente estava recebendo a variavel lista_filmes, esse parametro é passado como uma variavel
+
+    {% endblock %}
+
+
+- Mudando um pouco o codigo que foi feito anteriormente:
+
+        {% extends 'base.html' %}
+
+        {% comment %} {% load static %} {% endcomment %}
+
+        {% block titulo %}
+            HomePage Hashflix
+        {% endblock %}
+
+        {% block content %}
+
+            <h1> Essa é a pagina Homefilmes </h1>
+            {% for filme in lista_filmes %}         # <============ é possivel fazer um for diretamente
+            <hr>
+            <p>{{ filme }}</p>                      # <============ vai mostrar o titulo
+            <p>{{ filme.descrcao }}</p>             # <============ adiciona a descrição
+            <img src="{{filme.thumb.url}}" >        # <============ adiciona a imagem
+            {% endfor %}                            # <============ Finaliza o for
+
+        {% endblock %}
+
+
+
+
+
+
+
+
+
+=================================================================================================================================================================
+# Aula 21: Transformando nossas Views em Classes
+
+////////////////////////////////////////////////////////
+- A seguir é o arquivo views.py na pasta do app "filme" :
+
+    from django.shortcuts import render
+    from .models import Filme
+    from django.views.generic import TemplateView, ListView
+
+    # criar: url - view - html
+
+    # Create your views here.
+    class Homepage(TemplateView):
+        template_name = "homepage.html"
         
+    # o objetivo da classe Homefilmes é exibir uma lista de filmes (uma lista de objetos no banco de dados) 
+    # então quando vc tem uma view cujo objetivo é exibir uma lista de itens do seu banco de dados vc pode importar de uma listView
+    # Uma list View  espera que voce passe 2 informações, o template_name e o modelo
+
+    class Homefilmes(ListView):      
+
+        template_name = "homefilmes.html"
+        model =  Filme    # <======== model é o modelo do banco de dados que eu vou pegar a minha lista. 
+
+        # Com o uso do listview e do model ele vai me retornar uma object_list, esse object_list eu devo passar para o html da pagina especifica, no caso "Homefilmes"
+
+
+//////////////////////////////////////
+- A seguir é o arquivo homefilmes.py:
+
+    {% extends 'base.html' %}
+
+    {% comment %} {% load static %} {% endcomment %}
+
+    {% block titulo %}
+        HomePage Hashflix
+    {% endblock %}
+
+    {% block content %}
+
+        <h1> Essa é a pagina Homefilmes </h1>
+
+        {% comment %} {% for filme in lista_filmes %}    <====== Método anterior feito com function      {% endcomment %}
+
+        {% for filme in object_list %}                   <====== lista_filmes substituido por object_list, que é a lista que o listview retorna
+        <hr>
+        <p>{{ filme }}</p>
+        <p>{{ filme.descricao }}</p>
+        <img src="{{filme.thumb.url}}" >
+        {% endfor %}
+
+    {% endblock %}
+
+
+
+
+
+=================================================================================================================================================================
+# Aula 22: Criando uma View para cada Filme
+
+- quero fazer o seguinte: Quando clicar na imagem do filme, quero que ele me mostra os detalhes daquele filme (informações), pra isso eu uso o detailView. (abaixo o arquivo views):
+
+    from django.shortcuts import render
+    from .models import Filme
+    from django.views.generic import TemplateView, ListView, DetailView
+
+
+    class Homepage(TemplateView):
+        template_name = "homepage.html"
+        
+        
+    class Homefilmes(ListView):  
+        template_name = "homefilmes.html"
+        model =  Filme    
+
+
+    #  vai criar uma pagina para cada filme
+    class Detalhesfilme(DetailView):                  <=================== Criando uma nova classe e usando o DetailView
+        template_name = "detalhesfilme.html"
+        model = Filme
+        # no listview ele retornava uma lista,  e a variavel digamos a ser renderizada no html era object_list
+        # no detailview, a variavel a ser renderizada no html será o object (apenas 1 item)
+
+
+
+- Após isso, foi criado outro arquivo html chamado "detalhesfilme.html", nesse arquivo foi colocado a estrutura da pagina:
+
+    {% extends 'base.html' %}
+
+    {% comment %} {% load static %} {% endcomment %}
+
+    {% block titulo %}
+        HomePage Hashflix
+    {% endblock %}
+
+    {% block content %}
+
+        <h1> Esse é o detalhe do filme: {{object.titulo}}</h1>
+        <p>{{object}}</p>
+        <p>{{object.descricao}}</p>
+        <img src = "{{object.thumb.url}}">
+
+    {% endblock %}
+
+
+
+- Feito isso, é necessario adicionar um link para cada filme de forma automática, então na pasta do app "filmes" no arquivo urls.py foi feito o seguinte:
+
+        from django.urls import path, include
+        from .views import Homefilmes, Homepage, Detalhesfilme      # <====== adicionado a classe Detalhesfilme
+
+        urlpatterns = [
+            path('', Homepage.as_view()),
+            path('filmes/', Homefilmes.as_view()),
+            path('filmes/<int:pk>', Detalhesfilme.as_view()), # <========== (adicionado o path para cada filme) entre <> foi passado o parametro pk (dev ser especificado o tipo de parametro. ex int, str ...), pk é Primary Key, ele serve para colocar um id no path de cada filme de maneira automática
+        ]
+
+
+
+=================================================================================================================================================================
+# Aula 23: Criando links dinâmicos no site
+
+- digamos que o meu site tem o "link hashflix.com.br" e depois eu queira mudar para "hashflix.com" eu teria que alterar todos os links que são estáticos. 
+Mas existe uma forma para arrumar isso com links dinamicos. Quando coloco uma tag de link "<a href="" ></a>" , 
+no href eu consigo passar um parametro pra exibir a url que corresponde a uma view especifica, esse parametro deve ser definido no arquivo urls.py da pasta do app "filmes"
+
+    -esse é o arquivo detalhesfilme (foi adicionado um link):
+            {% extends 'base.html' %}
+
+            {% block titulo %}
+                HomePage Hashflix
+            {% endblock %}
+
+            {% block content %}
+
+                <h1> Essa é a pagina Homefilmes </h1>
+
+            {% for filme in object_list %}
+                <hr>
+                <a href=""><p>{{ filme }}</p></a>                <====== adicionado um link
+                <p>{{ filme.descricao }}</p>
+                <img src="{{filme.thumb.url}}" >
+            {% endfor %}
+
+            {% endblock %}
+
+
+
+    -esse é o arquivo urls.py da pasta do app "filmes":
+            from django.urls import path, include
+            from .views import Homefilmes, Homepage, Detalhesfilme      
+
+            app_name='filme'                              # <========== Adicionado ( essa variavel vai ser passada para o arquivo urls.py do projeto "hashflix")
+
+            urlpatterns = [
+                path('', Homepage.as_view(), name='homepage'),                         # <========== adicionado a variavel name para o path de um link dinamico
+                path('filmes/', Homefilmes.as_view(), name='homefilmes'),              # <========== adicionado a variavel name para o path de um link dinamico
+                path('filmes/<int:pk>', Detalhesfilme.as_view(),name='detalhesfilme'), # <========== adicionado a variavel name para o path de um link dinamico
+            ]
+
+
+
+    - esse é o arquivo urls.py da pasta do projeto "hashflix":
+            from django.contrib import admin
+            from django.urls import path, include
+            from django.conf import settings
+            from django.conf.urls.static import static
+
+            urlpatterns = [
+                path('admin/', admin.site.urls),
+                path('', include('filme.urls, namespace = "filme"')),  # <============  namespace foi incluido dentro de include para link dinamico
+            ]
+
+            urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+            urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+
+    - adicionando as urls no arquivo homefilmes.html:
+            {% extends 'base.html' %}
+
+            {% block titulo %}
+                HomePage Hashflix
+            {% endblock %}
+
+            {% block content %}
+
+                <h1> Essa é a pagina Homefilmes </h1>
+
+            {% for filme in object_list %}
+                <hr>
+                <a href="{% url 'filme:detalhesfilme' filme.id %}"><p>{{ filme }}</p></a>     <========== Na tag url eu defino qual link eu tenho que pegar 'filme:detalhesfilme' e passar o parametro id ou pk caso tiver
+                <p>{{ filme.descricao }}</p>
+                <img src="{{filme.thumb.url}}" >
+            {% endfor %}
+
+            {% endblock %}
+
+
+
+=================================================================================================================================================================
+# Aula 24: Modelo de Episódios e Chave Estrangeira
+
+- no arquivo models.py na pasta templates da pasta filmes, foi criado a classe Episodios:
+
+    from django.db import models
+    from django.utils import timezone # função timezone para pegar a data da criação
+
+    LISTA_CATEGORIAS = (
+        # (informação a ser armazenada no banco de dados , informação que vai aparecer ao usuário ),
+        ("ANALISES", "Análises"),
+        ("PROGRAMACAO", "Programação"),
+        ("APRESENTACAO", "Apresentação"),
+        ("OUTROS", "Outros"),
+    )
+
+    # Criar o Filme 
+    class Filme(models.Model):
+        titulo = models.CharField(max_length=100) # Charfield é um campo de texto pequeno
+        thumb = models.ImageField(upload_to='thumb_filmes') # quando a pessoa criar um filme, vai ter que fazer upload dessa imagem, e a imagem vai ser armazenada na pasta THUMB_FILMES
+        descricao = models.TextField(max_length=1000) # textfield é um campo de texto maior
+        categoria = models.CharField(max_length=15, choices = LISTA_CATEGORIAS) # choices são as opções pra essa variavel
+        visualizacoes = models.IntegerField(default=0) # IntegerField é um valor numérico
+        data_criacao = models.DateTimeField(default=timezone.now) # datetimefield é o formato de data com horario.   //   função timezone para pegar a data da criação
+        
+        def __str__(self):
+            return self.titulo
+        
+
+    # criar os episodios
+    class Episodio(models.Model):
+        filme = models.ForeignKey('Filme', related_name="episodios" on_delete = models.CASCADE)  # <======== chave estrangeira faz referencia do episodio ao filme, dentro dessa chave tem que ser passado o nome da classe, que no caso é Filme
+                        # <======== O ON_DELETE = MODELS.CASCADE serve para quando eu deletar o filme, os seus episódios sejam apagados também
+        titulo = models.CharField(max_length=100)
+        video = models.URLField()
+
+
+- E na tela admin foi registrado os episodios:
+
+        from django.contrib import admin
+        from .models import Filme, Episodio          # <======== Foi adicionado Episodios
+
+        admin.site.register(Filme)                   
+        admin.site.register(Episodio)                # <======== Foi adicionado Episodios
+
+
+
+=================================================================================================================================================================
+Aula 25: Vídeos em Tela Cheia e Listando Episódios no HTML
+
+- No arquivo detalhesfilme foi feito as seguintes alterações:
+        {% extends 'base.html' %}
+
+        {% comment %} {% load static %} {% endcomment %}
+
+        {% block titulo %}
+            HomeFilmes Hashflix
+        {% endblock %}
+
+        {% block content %}
+
+            <div class="py-10">
+                <h1> Esse é o detalhe do filme: {{object.titulo}}</h1>
+                <p>{{object}}</p>
+                <p>{{object.descricao}}</p>
+                <img src = "{{object.thumb.url}}">
+
+                <h2>Episódios</h2>
+                {% for episodio in object.episodios.all%}                                  # <======== foi feito um for para mostrar os episodios
+                    <a href="{{ episodio.video}}">                                         # <======== referencia do video
+                        <p>Episódio {{ forloop.counter }} : {{ episodio.titulo }} </p>     # <======== vai mostrar: episodio 2: como aprender python
+                    </a>
+                {% endfor %}
+            </div>    
+
+        {% endblock %}
+
+
+
+
+=================================================================================================================================================================
+# Aula 26: Passando variáveis personalizadas para as Views
+
+- No arquivo views.py foram feitas as alterações para passar uma variavel ca classe Filmes para a classe Detalhesfilme:
+
+        from django.shortcuts import render
+        from .models import Filme
+        from django.views.generic import TemplateView, ListView, DetailView
+
+        class Homepage(TemplateView):
+            template_name = "homepage.html"
+            
+            
+        class Homefilmes(ListView):  
+            template_name = "homefilmes.html"
+            model =  Filme    
+
+
+        class Detalhesfilme(DetailView):
+            template_name = "detalhesfilme.html"
+            model = Filme
+
+            def get_context_data(self, **kwargs):                                     <====== adicionado a função get_context_data para acessar os filmes
+                context = super(Detalhesfilme, self).get_context_data(**kwargs)       <====== deixar o context na primeira linha
+                filmes_relacionados = Filme.objects.filter(categoria = self.get_object().categoria)[0:5]  # <====== essa linha está pegando os objects da classe Filmes, no caso pegando 5 filmes cuja categoria são relacionadas com o filme escolhido
+                context['filmes_relacionados'] = filmes_relacionados
+                return context
+
+
+
+=================================================================================================================================================================
+# Aula 27: Criando nossos Gerenciadores de Contexto - Variáveis (para acessar informações de qualquer view)
+
+- Na pasta do app "filmes", foi criado um novo arquivo com o nome "context.py" ou "novos_context":
+
+        from .models import Filme
+
+
+        def lista_filmes_recentes(request):
+            lista_filmes = Filme.objects.all()order_by('-data_criacao')[0:10] # <======== vai criar uma lista de filmes oredenada DE MANEIRA DECRESCENTE ( -data_criacao ) pela data de criação. 
+            return {"lista_filmes_recentes": lista_filmes}
+
+
+        def lista_filmes_emalta(request):
+            lista_filmes = Filme.objects.all()order_by('-visualizacoes')[0:10]
+            return {"lista_filmes_emalta": lista_filmes}
+
+
+
+- No arquivo settings.py, na area de templates foi adicionado os contexts (as 2 funções: lista_filmes_recentes, lista_filmes_emalta):
+
+        TEMPLATES = [
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'DIRS': ['templates'],
+                'APP_DIRS': True,
+                'OPTIONS': {
+                    'context_processors': [
+                        'django.template.context_processors.debug',
+                        'django.template.context_processors.request',
+                        'django.contrib.auth.context_processors.auth',
+                        'django.contrib.messages.context_processors.messages',
+                        'filme.novos_context.lista_filmes_recentes',               <=========== adicionado
+                        'filme.novos_context.lista_filmes_emalta',                 <=========== adicionado
+                    ],
+                },
+            },
+        ]
+
+
+
+- No arquivo homefilmes foi adicionado:
+
+        {% extends 'base.html' %}
+
+        {% comment %} {% load static %} {% endcomment %}
+
+        {% block titulo %}
+            HomePage Hashflix
+        {% endblock %}
+
+        {% block content %}
+        <div class="py-10">
+            <h1> Essa é a pagina Homefilmes </h1>
+            {% comment %} {% for filme in lista_filmes %}    <====== Método anterior feito com function      {% endcomment %}
+            {% for filme in object_list %}
+                <hr>
+                <a href="{% url 'filme:detalhesfilme' filme.id %}"><p>{{ filme }}</p></a>
+                <p>{{ filme.descricao }}</p>
+                <img src="{{filme.thumb.url}}" >
+            {% endfor %}
+        </div>
+
+        <div class="py-10" >                         <=========== adicionado
+            <h2>Novo</h2>
+            {{ lista_filmes_recentes }}              <=========== adicionado
+        </div>
+
+        {% endblock %}
+
+
+
+
+=================================================================================================================================================================
+# Aula 28: Contagem de Visualizações
+
+- A idéia é adicionar a contagem de visualização quando o usuário entrar na pagina, foi feito o seguinte:
+
+from django.shortcuts import render
+from .models import Filme
+from django.views.generic import TemplateView, ListView, DetailView
+
+class Homepage(TemplateView):
+    template_name = "homepage.html"
+    
+    
+class Homefilmes(ListView):  
+    template_name = "homefilmes.html"
+    model =  Filme    
+
+
+#  vai criar uma pagina para cada filme
+class Detalhesfilme(DetailView):
+    template_name = "detalhesfilme.html"
+    model = Filme
+    
+    def get(self,request,*args,**kwargs):                  # <====== (Adicionado função get) por padrão o get recebe esses 4 argumentos, a função get vai retornar ao usuário o link que ela está querendo acessar
+    
+        # descobrir qual filme ele está acessando:
+        filme = self.get_object()
+        filme.visualizacoes += 1
+        filme.save                                                      # <===== salva a modificação no banco de dados
+        return super(Detalhesfilme, self).get(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super(Detalhesfilme, self).get_context_data(**kwargs)
+        filmes_relacionados = Filme.objects.filter(categoria = self.get_object().categoria)[0:5]  
+        context['filmes_relacionados'] = filmes_relacionados
+        return context
+
+

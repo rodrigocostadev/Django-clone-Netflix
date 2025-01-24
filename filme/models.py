@@ -22,7 +22,18 @@ class Filme(models.Model):
     
     def __str__(self):
         return self.titulo
-
-
+    
 
 # criar os episodios
+class Episodio(models.Model):
+    filme = models.ForeignKey('Filme', related_name="episodios", on_delete=models.CASCADE)  # <======== chave estrangeira faz referencia do episodio ao filme, dentro dessa chave tem que ser passado o nome da classe, que no caso é Filme
+    # O ON_DELETE = MODELS.CASCADE serve para quando eu deletar o filme, os seus episódios sejam apagados também
+    titulo = models.CharField(max_length=100)
+    video = models.URLField()
+    
+    def __str__ (self):
+        return self.filme.titulo + " - " + self.titulo
+    
+
+
+

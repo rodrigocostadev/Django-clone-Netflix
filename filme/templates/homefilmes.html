@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% comment %} {% load static %} {% endcomment %}
+
+{% block titulo %}
+    HomePage Hashflix
+{% endblock %}
+
+{% block content %}
+<div class="py-10">
+    <h1> Essa é a pagina Homefilmes </h1>
+    {% comment %} {% for filme in lista_filmes %}    <====== Método anterior feito com function      {% endcomment %}
+    {% for filme in object_list %}
+        <hr>
+        <a href="{% url 'filme:detalhesfilme' filme.id %}"><p>{{ filme }}</p></a>
+        <p>{{ filme.descricao }}</p>
+        <img src="{{filme.thumb.url}}" >
+    {% endfor %}
+</div>
+
+<div class="py-10" >
+    <h2>Novo</h2>
+    {{ lista_filmes_recentes }}
+</div>
+
+{% endblock %}

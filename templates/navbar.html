@@ -1,0 +1,37 @@
+
+{% load static %}
+{% comment %} <img src="{% static 'my_app/example.jpg' %}" alt="My image"> {% endcomment %}
+
+<nav class="w-full flex justify-between items-center py-3 px-4 z-50" > {% comment %} px é o padding {% endcomment %}
+    {% comment %} <div></div> {% endcomment %}
+
+    {% comment %} No tailwind todo objeto tem 12 de largura, então como quero dividir em 2, cada objeto pega 6 {% endcomment %}
+
+    <div class="w-6/12" > {% comment %} vai pegar 6 de largura, pois minha estrutura tem 12 de largura {% endcomment %}
+        <a href="/">
+            <img class="w-2/12 " src="{% static 'images/hashflix.png' %}" >
+        </a>
+    </div>   
+
+    <div class="w-6/12 flex flex-nowrap justify-end"> {% comment %} vai pegar 6 de largura, pois minha estrutura tem 12 de largura {% endcomment %}
+        <div class="mr-2">
+            <form>
+                <input type="text" class="py-1 px-2 rounded-md text-black" placeholder="Pesquisar..." > {% comment %} rounded-md é a definição para bordas redondas {% endcomment %}
+            </form>
+        </div>
+        <div class="mr-2">
+            <a>
+                <button class="bg-red-600 text-white py-1 px-3 rounded-md" >
+                    Login
+                </button>
+            </a>            
+        </div>
+        <div class="mr-2">
+            <a>
+                <button class="bg-red-600 text-white py-1 px-3 rounded-md" >
+                    Editar Perfil
+                </button>
+            </a>            
+        </div>
+    </div>    
+</nav>
