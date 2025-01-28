@@ -24,14 +24,14 @@ class Detalhesfilme(DetailView):
     # no listview ele retornava uma lista,  e a variavel digamos a ser renderizada no html era object_list
     # no detailview, a variavel a ser renderizada no html será o object (apenas 1 item)
     
-    def get(self,request,*args,**kwargs): # <====== por padrão o get recebe esses 4 argumentos
     # a função get vai retornar ao usuário o link que ela está querendo acessar
+    def get(self,request,*args,**kwargs): # <====== por padrão o get recebe esses 4 argumentos
     
         # descobrir qual filme ele está acessando:
         filme = self.get_object()
         filme.visualizacoes += 1
         filme.save()   # <===== salva a modificação no banco de dados
-        return super(Detalhesfilme, self).get(request, *args, **kwargs)
+        return super(Detalhesfilme, self).get(request, *args, **kwargs) # redireciona o usuário para a url final
     
     def get_context_data(self, **kwargs):
         context = super(Detalhesfilme, self).get_context_data(**kwargs)
