@@ -65,6 +65,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'filme.novos_context.lista_filmes_recentes',
                 'filme.novos_context.lista_filmes_emalta',
+                # 'novos_context.filme_destaque',
             ],
         },
     },
@@ -86,7 +87,7 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
+AUTH_USER_MODEL = "filme.Usuario"
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -133,3 +134,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = 'filme:homefilmes' # É o link que o usuario vai ser redirecionado quando o usuario fazer o login 
+
+LOGIN_URL = 'filme:login' # É onde o usuário vai fazer o login

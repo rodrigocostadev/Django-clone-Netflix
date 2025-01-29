@@ -861,36 +861,402 @@ Aula 25: Vídeos em Tela Cheia e Listando Episódios no HTML
 
 - A idéia é adicionar a contagem de visualização quando o usuário entrar na pagina, foi feito o seguinte:
 
-from django.shortcuts import render
-from .models import Filme
-from django.views.generic import TemplateView, ListView, DetailView
+        from django.shortcuts import render
+        from .models import Filme
+        from django.views.generic import TemplateView, ListView, DetailView
 
-class Homepage(TemplateView):
-    template_name = "homepage.html"
-    
-    
-class Homefilmes(ListView):  
-    template_name = "homefilmes.html"
-    model =  Filme    
+        class Homepage(TemplateView):
+            template_name = "homepage.html"
+            
+            
+        class Homefilmes(ListView):  
+            template_name = "homefilmes.html"
+            model =  Filme    
 
 
-#  vai criar uma pagina para cada filme
-class Detalhesfilme(DetailView):
-    template_name = "detalhesfilme.html"
-    model = Filme
-    
-    def get(self,request,*args,**kwargs):                  # <====== (Adicionado função get) por padrão o get recebe esses 4 argumentos, a função get vai retornar ao usuário o link que ela está querendo acessar
-    
-        # descobrir qual filme ele está acessando:
-        filme = self.get_object()
-        filme.visualizacoes += 1
-        filme.save                                                      # <===== salva a modificação no banco de dados
-        return super(Detalhesfilme, self).get(request, *args, **kwargs)
-    
-    def get_context_data(self, **kwargs):
-        context = super(Detalhesfilme, self).get_context_data(**kwargs)
-        filmes_relacionados = Filme.objects.filter(categoria = self.get_object().categoria)[0:5]  
-        context['filmes_relacionados'] = filmes_relacionados
-        return context
+        #  vai criar uma pagina para cada filme
+        class Detalhesfilme(DetailView):
+            template_name = "detalhesfilme.html"
+            model = Filme
+            
+            def get(self,request,*args,**kwargs):                  # <====== (Adicionado função get) por padrão o get recebe esses 4 argumentos, a função get vai retornar ao usuário o link que ela está querendo acessar
+            
+                # descobrir qual filme ele está acessando:
+                filme = self.get_object()
+                filme.visualizacoes += 1
+                filme.save                                                      # <===== salva a modificação no banco de dados
+                return super(Detalhesfilme, self).get(request, *args, **kwargs)
+            
+            def get_context_data(self, **kwargs):
+                context = super(Detalhesfilme, self).get_context_data(**kwargs)
+                filmes_relacionados = Filme.objects.filter(categoria = self.get_object().categoria)[0:5]  
+                context['filmes_relacionados'] = filmes_relacionados
+                return context
+
+
+=================================================================================================================================================================
+# Aula 31: Edições Dinâmicas com Javascript e Filme em Destaque
+
+Na pagina filmes, quero deixar a imagem de fundo com o filme destaque (o filme mais novo), mas por enquanto a image é estatica, 
+e para mudar isso preciso passar uma variável no lugar dessa imagem de fundo, então farei isso com context adicionando uma nova 
+função no arquivo novos_context para passar essa variavel. Veja:
+
+- No arquivo novos_context.py foi adicionado uma nova função:
+
+        from .models import Filme
+
+        def lista_filmes_recentes(request):
+            lista_filmes = Filme.objects.all().order_by('-data_criacao')[0:8] 
+            return {"lista_filmes_recentes": lista_filmes}
+
+
+        def lista_filmes_emalta(request):
+            lista_filmes = Filme.objects.all().order_by('-visualizacoes')[0:8]
+            return {"lista_filmes_emalta": lista_filmes}
+
+
+        def filme_destaque(request):                                             <============ Nova Função
+            filme = Filme.objects.order_by('-data-criacao')[0]
+            return {"filme_destaque" : filme}
+
+
+- Após adicionar a função no arquivo novos_context, no arquivo settings.py adicionar a função que foi criada na area de templates em context_processors:
+
+        TEMPLATES = [
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'DIRS': ['templates'],
+                'APP_DIRS': True,
+                'OPTIONS': {
+                    'context_processors': [
+                        'django.template.context_processors.debug',
+                        'django.template.context_processors.request',
+                        'django.contrib.auth.context_processors.auth',
+                        'django.contrib.messages.context_processors.messages',
+                        'filme.novos_context.lista_filmes_recentes',
+                        'filme.novos_context.lista_filmes_emalta',
+                        'novos_context.filme_destaque',                     # <======== Adicionando a função criada filme_destaque
+                    ],
+                },
+            },
+        ]
+
+
+- Simplificando um pouco o meu arquivo novos_context.py :
+
+        from .models import Filme
+
+        def lista_filmes_recentes(request):
+            lista_filmes = Filme.objects.all().order_by('-data_criacao')[0:8] 
+            filme_destaque = lista_filmes[0]                                                     # <======== Filme destaqueé o meu primeiro filme mais recente
+            return {"lista_filmes_recentes": lista_filmes, "filme_destaque" : filme_destaque}    # <======== Modificando o return
+
+
+
+        def lista_filmes_emalta(request):
+            lista_filmes = Filme.objects.all().order_by('-visualizacoes')[0:8]
+            return {"lista_filmes_emalta": lista_filmes}
+
+
+
+
+- Feito isso, agora no meu arquivo homefilmes.py devo mudar a imagem de estática para variável:
+
+    - como era anteriormente:
+
+            <main class='bg-primary_black min-h-screen w-full'>
+                <section class="h-screen relative bg-no-repeat pb-8 pl-6 flex items-end bg-cover" style="background-image: url('{% static 'images/python.png' %}');">   
+                    <div>
+                        <h2 class="text-6xl font-semibold text-white my-4">
+                            TITULO
+                        </h2>
+                        <p class=" w-11/12 md:w-5/12 font-medium text-white my-4">
+                            DESCRICAO
+                        </p>
+                        <div class="flex my-4">
+                            <a href="#">
+                                <button class="flex items-center bg-white py-2 px-5 rounded-md" style='color:black;'>
+                                    <ion-icon name="play" class="text-2xl"></ion-icon>
+                                    <span class="ml-3 font-medium " >
+                                        Play
+                                    </span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                </section> 
+
+
+
+    -como ficou agora:
+
+            <main class='bg-primary_black min-h-screen w-full'>
+                <section class="h-screen relative bg-no-repeat pb-8 pl-6 flex items-end bg-cover" style="background-image: url('{{filme_destaque.thumb.url}}');">   # <========
+                    <div>
+                        <h2 class="text-6xl font-semibold text-white my-4">
+                            {{filme_destaque.titulo}}                                                                                                               # <========
+                        </h2>
+                        <p class=" w-11/12 md:w-5/12 font-medium text-white my-4">
+                            {{filme_destaque.descricao}}                                                                                                            # <========
+                        </p>
+                        <div class="flex my-4">
+                            <a href="{% url 'filme:detalhesfilme' filme_destaque.id %}">                                                                            # <========
+                                <button class="flex items-center bg-white py-2 px-5 rounded-md" style='color:black;'>
+                                    <ion-icon name="play" class="text-2xl"></ion-icon>
+                                    <span class="ml-3 font-medium " >
+                                        Play
+                                    </span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                </section> 
+
+
+
+=================================================================================================================================================================
+# Aula 33: Criando nosso Usuário Personalizado e adaptando o projeto
+
+- No arquivo models.py foi feito o seguinte:
+
+        from django.db import models
+        from django.utils import timezone # função timezone para pegar a data da criação
+        from django.contrib.auth.models import AbstractUser                                     # <======== Importando bibliotecas
+
+        # Create your models here.
+
+        LISTA_CATEGORIAS = (
+            # (informação a ser armazenada no banco de dados , informação que vai aparecer ao usuário ),
+            ("ANALISES", "Análises"),
+            ("PROGRAMACAO", "Programação"),
+            ("APRESENTACAO", "Apresentação"),
+            ("OUTROS", "Outros"),
+        )
+
+        class Filme(models.Model):
+            titulo = models.CharField(max_length=100) # Charfield é um campo de texto pequeno
+            thumb = models.ImageField(upload_to='thumb_filmes') # quando a pessoa criar um filme, vai ter que fazer upload dessa imagem, e a imagem vai ser armazenada na pasta THUMB_FILMES
+            descricao = models.TextField(max_length=1000) # textfield é um campo de texto maior
+            categoria = models.CharField(max_length=15, choices = LISTA_CATEGORIAS) # choices são as opções pra essa variavel
+            visualizacoes = models.IntegerField(default=0) # IntegerField é um valor numérico
+            data_criacao = models.DateTimeField(default=timezone.now) # datetimefield é o formato de data com horario.   //   função timezone para pegar a data da criação
+            
+            def __str__(self):
+                return self.titulo
+            
+
+        class Episodio(models.Model):
+            filme = models.ForeignKey('Filme', related_name="episodios", on_delete=models.CASCADE)  
+            # O ON_DELETE = MODELS.CASCADE serve para quando eu deletar o filme, os seus episódios sejam apagados também
+            titulo = models.CharField(max_length=100)
+            video = models.URLField()
+            
+            def __str__ (self):
+                return self.filme.titulo + " - " + self.titulo            
+            
+            
+        class Usuario(AbstractUser):                                                       # <======== Criando nova classe
+            filmes_vistos = models.ManyToManyField("Filme")
+
+
+
+- Após criar uma nova classe em models.py, tenho que adicionar essa classe no arquivo admin.py . veja o arquivo admin.py:
+
+        from django.contrib import admin
+        from .models import Filme, Episodio, Usuario 
+        from django.contrib.auth.admin import UserAdmin                       # <======== Importando bibliotecas
+
+        # Register your models here.
+        admin.site.register(Filme)
+        admin.site.register(Episodio)
+        admin.site.register(Usuario, UserAdmin)                               # <======== Registrando o novo usuário
+
+
+
+
+- Depois passar o parametro de AUTH_USER_MODEL no arquivo settings.py :
+
+        AUTH_USER_MODEL = "filme.Usuario"     # <======== Modelo que vai validar a autenticação do usuário. | Usuario = classe do models.py / filme = app filme (( NÃO É A CLASSE FILME ))
+
+        AUTH_PASSWORD_VALIDATORS = [
+            {
+                'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+            },
+            {
+                'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+            },
+            {
+                'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+            },
+            {
+                'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+            },
+        ]
+
+
+- Feito isso, como criamos classe no arquivo models.py, é necessário dar o comando makemigrate e migrate:
+
+        === python manage.py makemigrations ===
+        === python manage.py migrate === 
+
+
+- AO TENTAR RODAR O PROJETO VAI DAR ERRO: Pois quando o projeto foi criado, nós estavamos usando o modelo de usuário padrão do django, 
+mas como agora estamos customizando o modelo de usuário, o django não reconhece esse tipo de usuário, então no caso devemos "resetar" esse padrão.
+Para isso tem 2 opções:
+    1 deletar os arquivos 0001 0002 e 0003 da pasta migrations, e deletar os arquivos do banco de dados
+    2 tentar executar os seguintes comandos:
+        - No arquivo settings.py, comentar a linha AUTH_USER_MODEL
+        - Rodar o comando:
+            ===    python manage.py migrate auth zero    === 
+        - No arquivo settings.py, descomentar a linha AUTH_USER_MODEL
+        - Rodar o comando:
+            ===    python manage.py migrate auth    === 
+
+
+- Como não deu certo a 2 opção, fazer a 1 opção ( deletar os arquivos 0001 0002 e 0003 da pasta migrations, e deletar o arquivo do banco de dados ) 
+- rodar o código:
+    === python manage.py makemigrations ===
+- Rodar o comando:
+    ===    python manage.py migrate ===    
+
+
+- feito isso criar o superuser com o comando:
+    ===    python manage.py createsuperuser   ===    
+    agora definir nome de usuário, email e senha
+
+
+- caso continue dando erro, repetir o processo:
+    * Como não deu certo a 2 opção, fazer a 1 opção ( deletar os arquivos 0001 0002 e 0003 da pasta migrations, e deletar o arquivo do banco de dados ) 
+    * rodar o código:
+        === python manage.py makemigrations ===
+    * Rodar o comando:
+        ===    python manage.py migrate ===   
+
+
+
+- Após dar certo, acessar a tela de admin e clicar no superuser, veja que não tem o campo filmes vistos que está na classe de usuários no arquivo models.py, 
+esse campo filmes vistos precisa aparecer ao usuário pois ele foi configurado com o UserAdmin que foi importado no arquivo admin.py.
+Só está aparecendo os campos do UserAdmin na tela, mas não estão aparecendo os campos que eu criei " campos_filmes " , 
+então temos que editar os campos que o user admin vai mostrar pra gente. veja o arquivo admin.py:
+
+        from django.contrib import admin
+        from .models import Filme, Episodio, Usuario 
+        from django.contrib.auth.admin import UserAdmin
+
+        # Só existe porque a gente quer que no admin apareça o campo personalizado filmes_vistos
+        campos = list(UserAdmin.fieldsets)                                                             # <========
+        campos.append(("Histórico", {'fields':('filmes_vistos', )}))                                   # <========
+        UserAdmin.fieldsets = tuple(campos)                                                            # <========
+
+        # Register your models here.
+        admin.site.register(Filme)
+        admin.site.register(Episodio)
+        admin.site.register(Usuario, UserAdmin)
+
+
+
+=================================================================================================================================================================
+# Aula 36: Bloqueio de Páginas apenas para usuários com login
+
+- Bloqueando acesso de usuários sem login:
+
+        from django.shortcuts import render
+        from .models import Filme
+        from django.views.generic import TemplateView, ListView, DetailView
+        from django.contrib.auth.mixins import LoginRequiredMixin                      # <====== LoginRequiredMixin é uma classe em python que eu passo para as CBV
+
+
+        class Homepage(TemplateView):
+            template_name = "homepage.html"
+            
+            
+        class Homefilmes(LoginRequiredMixin,ListView):                                 # <======== Adicionado o LoginRequiredMixin para bloquear acesso de usuarios sem login
+            template_name = "homefilmes.html"
+            model =  Filme    
+          
+
+        class Detalhesfilme(LoginRequiredMixin,DetailView):                            # <======== Adicionado o LoginRequiredMixin para bloquear acesso de usuarios sem login
+            template_name = "detalhesfilme.html"
+            model = Filme
+
+            def get(self,request,*args,**kwargs): 
+            
+                # descobrir qual filme ele está acessando:
+                filme = self.get_object()
+                filme.visualizacoes += 1
+                filme.save()   # <===== salva a modificação no banco de dados
+                usuario = request.user
+                usuario.filmes_vistos.add(filme)
+                return super(Detalhesfilme, self).get(request, *args, **kwargs) # redireciona o usuário para a url final
+            
+            def get_context_data(self, **kwargs):
+                context = super(Detalhesfilme, self).get_context_data(**kwargs)
+                filmes_relacionados = Filme.objects.filter(categoria = self.get_object().categoria)[0:5] 
+                context['filmes_relacionados'] = filmes_relacionados
+                return context
+
+        class Pesquisafilme(LoginRequiredMixin,ListView):                             # <======== Adicionado o LoginRequiredMixin para bloquear acesso de usuarios sem login
+            template_name = "pesquisa.html"
+            model = Filme
+            
+            def get_queryset(self):
+                termo_pesquisa = self.request.GET.get('query')
+                if termo_pesquisa:
+                    object_list = self.model.objects.filter(titulo__contains=termo_pesquisa)
+                    return object_list
+                else:
+                    return None
+
+
+- Se eu bloqueio o usuário que não tem login, devo redireciona-lo para uma pagina. Veja o que foi adicionado no o arquivo settings.py :
+    - No fim do arquivo settings.py adicionar:
+
+        LOGIN_REDIRECT_URL = 'filme:homefilmes'     # <======== É o link que o usuario vai ser redirecionado quando o usuario fazer o login 
+        LOGIN_URL = 'filme:login'                   # <======== É onde o usuário vai fazer o login
+
+
+- Adicionar o path "caminho" do url do arquivo urls.py da pasta filme:
+
+        from django.urls import path, include
+        from .views import Homefilmes, Homepage, Detalhesfilme      
+        from django.contrib.auth import views as auth_view
+
+
+        app_name='filme'
+
+        urlpatterns = [
+            path('', Homepage.as_view(), name='homepage'),
+            path('filmes/', Homefilmes.as_view(), name='homefilmes'),
+            path('filmes/<int:pk>', Detalhesfilme.as_view(),name='detalhesfilme'), 
+            path('login/', auth_view.LoginView.as_view(template_name = 'login.html'), name='login'),         # <====== Adicionando os caminhos de login
+            path('logout/', auth_view.LogoutView.as_view(template_name = 'logout.html'), name='logout'),     # <====== Adicionando os caminhos de logout
+        ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
