@@ -1,13 +1,30 @@
-from django.shortcuts import render
-from .models import Filme
-from django.views.generic import TemplateView, ListView, DetailView
+from django.shortcuts import render, redirect, reverse
+from .models import Filme, Usuario
+from .forms import Criarcontaform, FormHomepage
+from django.views.generic import TemplateView, ListView, DetailView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin # <====== LoginRequiredMixin é uma classe em python que eu passo para as CBV
 
 # criar: url - view - html
 
 # Create your views here.
-class Homepage(TemplateView):
+class Homepage(FormView):
     template_name = "homepage.html"
+    form_class = FormHomepage
+    
+    def get(self, request, *args, **kwargs): # A função get por padrão leva o usuário para a url que foi definida no template_name, no caso = homepage.html
+        if request.user.is_authenticated: # se o usuário esta autenticado
+            return redirect('filme:homefilmes') # redireciona para uma view, e não para um template | padrão ==>  redirect( APP : URL )
+        else:
+            return super().get(request, *args, **kwargs)  # redireciona o usuário para a homepage.html
+        
+    def get_success_url(self):
+        email = self.request.POST.get("email") # pega o email do formulario do tipo POST
+        usuarios = Usuario.objects.filter(email = email)
+        # print(email)
+        if usuarios:
+            return reverse('filme:login')
+        else:
+            return reverse('filme:criarconta')
     
     
 class Homefilmes(LoginRequiredMixin,ListView):  # <========= o objetivo dessa classe é exibir uma lista de filmes (uma lista de objetos no banco de dados) 
@@ -55,6 +72,25 @@ class Pesquisafilme(LoginRequiredMixin,ListView):
             return None
 
 
+class Paginaperfil(LoginRequiredMixin,TemplateView):
+    template_name = 'editarperfil.html'
+    
+
+class Criarconta(FormView):
+    template_name = 'criarconta.html'
+    form_class = Criarcontaform
+    
+    def form_valid(self, form): # Verifica se as informações do formulário foram preenchidas corretamente
+        form.save()             # salvar o formulãrio para salvar no banco de dados a nova conta
+        return super().form_valid(form)   
+    
+    
+    def get_success_url(self):
+        
+        # a função get_success_url espera um url como resposta e não um redirecionamento, então por isso foi usado no return reverse('filme:login')
+        return reverse('filme:login')
+        
+    
 
 
 

@@ -1234,22 +1234,491 @@ então temos que editar os campos que o user admin vai mostrar pra gente. veja o
 
 
 
+=================================================================================================================================================================
+# Aula 37: Personalizando a barra de navegação para usuários
+
+- Após o usuário fazer login quero que a minha nova "homepage" seja homefilmes.html e não a pagina homepage.html (APÓS O LOGIN O USUÁRIO SERA REDIRECIONADO)
+
+- A lógica é a seguinte: quando clicar no botão HASHTAG que redireciona para a homepage, o django deve verificar se o usuário esta logado ou não, 
+se ele estiver autenticado o redirecionamento será para a pagina homefilmes.html, se não estiver autenticado o redirecionamento será para a pagina homepage.html
+
+- Para fazer isso é necessário editar a classe Homepage, fazendo que ela redirecione o usuário para uma view, e não para o template, Veja como ficou o arquivo Views.py:
+
+        from django.shortcuts import render, redirect                                                    # <====== Adicionado a biblioteca redirect
+        from .models import Filme
+        from django.views.generic import TemplateView, ListView, DetailView
+        from django.contrib.auth.mixins import LoginRequiredMixin 
+
+        # criar: url - view - html
+
+        # Create your views here.
+        class Homepage(TemplateView):
+            template_name = "homepage.html"
+            
+            def get(self, request, *args, **kwargs):                                                    # <====== Adicionado a função do tipo get
+                # A função get por padrão leva o usuário para a url que foi definida no template_name, no caso = homepage.html
+
+                if request.user.is_authenticated: # se o usuário esta autenticado
+                    return redirect('filme:homefilmes') # redireciona para uma view, e não para um template | padrão ==>  redirect( APP : URL )
+                else:
+                    return super().get(request, *args, **kwargs)  # redireciona o usuário para a homepage.html
+
+        
+        (  CONTINUAÇAO DO ARQUIVO ...  )
 
 
 
 
+=================================================================================================================================================================
+# Aula 38: Finalizando a barra de navegação e processo de logout 
+
+- O botão de sair vai rodar o processo de logout do usuario, e esse processo de logout é gerenciado automaticamente 
+pelo auth_view.LogoutView do arquivo urls.py da pasta thumb_filmes. Veja como ficou o arquivo navbar.html
+
+        {% load static %}
+
+        <nav class="w-full flex justify-between items-center py-3 px-4 fixed z-50" > 
+
+            <div class="w-6/12" > 
+                <a href="/">
+                    <img class="w-2/12 " src="{% static 'images/hashflix.png' %}" >
+                </a>
+            </div>   
+
+            <div class="w-6/12 flex flex-nowrap justify-end"> 
+                {% if user.is_authenticated %}
+                <div class="mr-2">
+                    <form>
+
+                        <input type="text" class="py-1 px-2 rounded-md text-black" placeholder="Pesquisar..." > 
+                    </form>
+                </div>
+                {% endif %}
+                
+                <div class="mr-2">
+                    <form method="post" action="{% url 'filme:logout' %}">                                            # <============= Adicionado a url de redirecionamento
+                        {% csrf_token %}
+                        {% comment %} <button class="bg-red-600 text-white py-1 px-3 rounded-md" type="submit">Sair</button> {% endcomment %}
+                    </form>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'filme:logout' %}">                                                               # <============= Adicionado a url de redirecionamento
+                        <button class="bg-red-600 text-white py-1 px-3 rounded-md" >
+                            Sair
+                        </button>
+                    </a>            
+                    {% else %}
+                    <a href="{% url 'filme:login' %}" >                                                                # <============= Adicionado a url de redirecionamento
+                        <button class="bg-red-600 text-white py-1 px-3 rounded-md" >
+                            Login
+                        </button>
+                    </a>  
+                    {% endif %}
+                </div>
+
+                {% if user.is_authenticated %}
+                <div class="mr-2">
+                    <a href="{% url 'filme:editarperfil' %}" >
+                        <button class="bg-red-600 text-white py-1 px-3 rounded-md" >
+                            Editar Perfil
+                        </button>
+                    </a>            
+                </div>
+                {% endif %}
+            </div>    
+        </nav>
+
+
+
+- feito isso,  agora os proximos passos são: 
+    - Criar a VIEW que vai gerenciar a pagina
+    - Criar a URL que vai gerar a pagina 
+    - Criar o TEMPLATE que vai gerenciar a pagina
+
+- Na pagina urls.py foi adicionado:
+
+        from django.urls import path, include
+        from .views import Homefilmes, Homepage, Detalhesfilme, Pesquisafilme, Paginaperfil      # <====== Importando a classe Paginaperfil 
+        from django.contrib.auth import views as auth_view
+        # from .views import homepage, homefilmes    # <====== Método anterior feito com function
+
+        app_name='filme'
+
+        urlpatterns = [
+            path('', Homepage.as_view(), name='homepage'),
+            path('filmes/', Homefilmes.as_view(), name='homefilmes'),
+            path('filmes/<int:pk>', Detalhesfilme.as_view(),name='detalhesfilme'), 
+            path('pesquisa/', Pesquisafilme.as_view(), name = 'pesquisafilme'),
+            path('login/', auth_view.LoginView.as_view(template_name = 'login.html'), name='login'), 
+            path('logout/', auth_view.LogoutView.as_view(template_name = 'logout.html'), name='logout'), 
+            path('editarperfil/', Paginaperfil.as_view(), name = 'editarperfil')                # <========== Adicionado o path da pagina editarperfil
+        ]
+
+
+
+=================================================================================================================================================================
+# Aula 39: Páginas de Login e Logout
+
+- Foi criado o arquivo logout.html:
+
+        {% extends 'base.html' %}
+        {% load static %}
+
+        {% block titulo %}
+        Logout
+        {% endblock %}
+
+        {% block content %}
+        <header class="min-h-screen bg-black bg-opacity-75 bg-blend-overlay showcase border-gray-600 border-b-8 flex justify-center items-center bg-no-repeat"  style="background-image: url('{% static 'images/background_netflix.jpg' %}');">
+                <div class="z-10 h-full py-32 md:py-0 text-gray-100 text-center flex items-center flex-col">
+                    <h2 class="text-2xl">Você saiu da sua conta</h2>
+                    <div class="flex flex-nowrap justify-center space-x-5 p-5">
+                    <a href="{% url 'filme:login' %}"><button class="bg-red-600  py-1 px-3 text-white md:text-lg rounded-md">Fazer Login</button></a>
+                    <a href="{% url 'filme:criarconta' %}"><button class="bg-red-600 py-1 px-3 text-white md:text-lg rounded-md">Criar uma Conta</button></a>
+                    </div>
+                </div>
+            </header>
+
+            <footer class=" px-5 py-10 ">
+                <ul class="flex justify-between items-center">
+
+                    <li>&copy; 2021</li>
+                    <li> Feito com Python (Django)</li>
+                    <li>Hashtag</li>
+                </ul>
+            </footer>
+        {% endblock %}
 
 
 
 
+- No arquivo views.py foi adicionado a classe:
+
+        class Criarconta(LoginRequiredMixin,TemplateView):
+            template_name = 'criarconta.html'
+
+
+
+- No arquivo urls.py foi adicionado um novo path:
+
+        from django.urls import path, include
+        from .views import Homefilmes, Homepage, Detalhesfilme, Pesquisafilme, Paginaperfil, Criarconta      # <====== importando a classe Criarconta 
+        from django.contrib.auth import views as auth_view
+        # from .views import homepage, homefilmes    # <====== Método anterior feito com function
+
+        app_name='filme'
+
+        urlpatterns = [
+            # path('', homepage), <====== Método anterior feito com function
+            # path('filmes/', homefilmes),  <====== Método anterior feito com function
+            path('', Homepage.as_view(), name='homepage'),
+            path('filmes/', Homefilmes.as_view(), name='homefilmes'),
+            path('filmes/<int:pk>', Detalhesfilme.as_view(),name='detalhesfilme'),
+            path('pesquisa/', Pesquisafilme.as_view(), name = 'pesquisafilme'),
+            path('login/', auth_view.LoginView.as_view(template_name = 'login.html'), name='login'), 
+            path('logout/', auth_view.LogoutView.as_view(template_name = 'logout.html'), name='logout'), 
+            path('editarperfil/', Paginaperfil.as_view(), name = 'editarperfil'),
+            path('criarconta/', Criarconta.as_view(), name="criarconta")                                    # <====== Novo path adicionado
+        ]
 
 
 
 
+- Foi criado o arquivo criarconta.html (DE MANEIRA BASICA POR ENQUANTO):
+
+        {% extends 'base.html' %}
+
+        {% load static %}
+
+        {% block titulo %}
+        Criar Conta
+        {% endblock %}
+
+        {% block content %}
+            Página de Criação de Conta
+        {% endblock %}
+
+
+
+- No arquivo de login foi adicionado:
+
+    - Colocar o formulario (    TAG {{ form }}     ) dentro das tags fieldsets
+
+
+        {% extends 'base.html' %}
+        {% load static %}
+        {% load crispy_forms_tags %}                            # <========== adicionar a tag para carregar o crispy forms
+
+        {% block titulo %}
+        Fazer Login
+        {% endblock %}
+
+        {% block content %}
+            <header class="min-h-screen bg-black bg-opacity-75 bg-blend-overlay showcase border-gray-600 border-b-8 flex justify-center items-center bg-no-repeat"  style="background-image: url('{% static 'images/background_netflix.jpg' %}');">
+                <div class="z-10 h-full py-32 md:py-0 text-gray-100 text-center flex items-center flex-col">
+                    <form method="post">
+                        {% csrf_token %}                       # <========== Adicionar o crsf token logo apos o formulário do tipo post
+                        <fieldset class="form-group">
+                            <legend class="border-bottom mb-4">Faça Login para continuar</legend>
+                            {{ form|crispy }}                  # <========== CRISPY FORMS: Configuração padrão do django para editar formulários ( COLOCAR DENTRO DA TAG FIELDSET )
+                        </fieldset>
+                        <button class="bg-red-600 py-1 my-2 px-3 w-full text-white md:text-lg rounded-md" type="submit">Fazer Login</button>
+                    </form>
+                    <small>
+                        Não tem uma conta ainda? <p><a href="{% url 'filme:criarconta' %}">Clique aqui para criar uma conta</a></p>
+                    </small>
+                </div>
+            </header>
+
+            <footer class=" px-5 py-10 ">
+                <ul class="flex justify-between items-center">
+
+                    <li>&copy; 2021</li>
+                    <li> Feito com Python (Django)</li>
+                    <li>Hashtag</li>
+                </ul>
+            </footer>
+        {% endblock %}
+
+
+    - O que é Crispy? CRISPY FORMS: Configuração padrão do bootstrap para estilizar formulários 
+    - Como instalar e ativar o crispy forms? :
+        ===    pip install django-crispy-forms     ===
+        ===    pip install crispy-bootstrap5     ===
 
 
 
 
+    - Após instalar o crispy forms e o crispy bootstrap, adiciona-los na area INSTALLED_APPS do arquivo settings.py :
+
+        INSTALLED_APPS = [
+            'django.contrib.admin',
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'django.contrib.sessions',
+            'django.contrib.messages',
+            'django.contrib.staticfiles',
+            'filme',
+            'crispy_forms',
+            'crispy_bootstrap5',
+        ]
+
+    - Ainda no mesmo arquivo settings.py, adicionar ao fim do arquivo 2 constantes referentes ao crispy:
+
+        CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+
+        CRISPY_TEMPLATE_PACK = 'bootstrap5'
+
+
+
+=================================================================================================================================================================
+# Aula 40: Criar formulários personalizados e Criar Conta do Usuário
+
+- Por padrão o formulário de criação de conta do django pede para o usuário: Username, senha e confirmação de senha.
+Mas como quero pedir ao usuário o email, não posso usar o formulário padrão do django, por isso vamos criar um formulário personalizado de criação de conta.
+
+- Na pasta do app filme criar um arquivo chamado forms.py
+- Cada formulário vai ser uma classe que vou importar de uma classe padrão do django, e nessa classe vou adicionar os campos do formulário. veja o arquivo forms.py:
+
+        from django.contrib.auth.forms import UserCreationForm
+        from .models import Usuario
+        from django import forms
+
+        # o formulário de criação de conta vai criar um novo usuário
+        class Criarcontaform(UserCreationForm): 
+            email = forms.EmailField()
+            
+            # Dentro dessa classe  tem que criar outra classe chamada meta para definir qual o modelo 
+            # que gerencia o usuário: ( o modelo padrão do django ou o seu modelo próprio)
+            # no nosso caso é o meu modelo proprio, então informo que o model da classe meta é igual a Usuario
+            class Meta:
+                model = Usuario
+                # fields é uma tupla que vai dizer quais campos vão ser exibidos no formulário
+                fields = ('username','email','password1','password2' ) # o nome padrão de coloque a sua senha é: password1 , o nome padrão de confirmação de senha é password2
+            
+
+- Feito isso, tenho que importar esse formulário dentro do arquivo views e fazer modificações, veja o arquivo views.py :
+
+        from django.shortcuts import render, redirect
+        from .models import Filme
+        from .forms import Criarcontaform                                                   # <====== Adicionado
+        from django.views.generic import TemplateView, ListView, DetailView, FormView       # <====== Adicionado
+        from django.contrib.auth.mixins import LoginRequiredMixin  
+
+
+        (  CONTINUAÇAO DO ARQUIVO ...  )
+
+
+        class Criarconta(LoginRequiredMixin,FormView):                                      # <====== Modificado de TemplateView para FormView
+            template_name = 'criarconta.html' 
+            form_class = Criarcontaform                                                     # <====== Adicionado
+
+
+
+- pagina criarconta.html:
+
+        {% extends 'base.html' %}
+        {% load static %}
+        {% load crispy_forms_tags %}
+
+        {% block titulo %}
+        Criar Conta
+        {% endblock %}
+
+        {% block content %}
+
+            <header class="min-h-screen bg-black bg-opacity-75 bg-blend-overlay showcase border-gray-600 border-b-8 flex justify-center items-center bg-no-repeat"  style="background-image: url('{% static 'images/background_netflix.jpg' %}');">
+                <div class="z-10 h-full py-32 md:py-0 text-gray-100 text-center flex items-center flex-col">
+                    <form method="post">
+                    {% csrf_token %}
+                        <fieldset class="form-group">
+                            <legend class="border-bottom mb-4">Crie uma conta para continuar</legend>
+                        {{ form }}                                                                         # <====== Adicionado sem o crispy
+                        </fieldset>
+                        <button class="bg-red-600 py-1 px-3 text-white w-full md:text-lg rounded-md" type="submit">Criar Conta</button>
+                    </form>
+                </div>
+            </header>
+
+            <footer class=" px-5 py-10 ">
+                <ul class="flex justify-between items-center">
+
+                    <li>&copy; 2021</li>
+                    <li> Feito com Python (Django)</li>
+                    <li>Hashtag</li>
+                </ul>
+            </footer>
+
+        {% endblock %}
+
+
+- quando se cria um FormView dentro do django, tem outras 2 funções que voce precisa editar ( ou não ):
+
+        class Criarconta(LoginRequiredMixin,FormView):
+            template_name = 'criarconta.html'
+            form_class = Criarcontaform
+            
+            # Verifica se as informações do formulário foram preenchidas corretamente 
+            def form_valid(self, form):                                                                     # <====== Adicionado
+                form.save()             # salvar o formulãrio para salvar no banco de dados a nova conta
+                return super().form_valid(form)   
+            
+            
+            def get_success_url(self):                                                                      # <====== Adicionado
+                
+                # a função get_success_url espera um url como resposta e não um redirecionamento, então por isso foi usado no return reverse('filme:login')
+                return reverse('filme:login')
+
+
+
+=================================================================================================================================================================
+# Aula 41: Redirecionamento Dinâmico de usuários
+
+- Na página homepage.html, na sessão onde diz: ( Quer começar? Coloque seu e-mail abaixo para acessar. ) 
+foi adicionado a tag token de crsf no formulário, juntamente com a tag {{ form|crispy }} 
+
+- A pagina homepage.html inicialmente foi criada como um templateView, mas para receber e enviar um formulário ela precisa ser do tipo FormView,
+então no arquivo views.py foi alterado o seguinte:
+
+        class Homepage(FormView):                           # <====== Modificado de TemplateView para FormView
+            template_name = "homepage.html"
+            form_class = ""                                 # <====== Adicionado
+            
+            def get(self, request, *args, **kwargs):
+                if request.user.is_authenticated:
+                    return redirect('filme:homefilmes')
+                else:
+                    return super().get(request, *args, **kwargs)  # redireciona o usuário para a homepage.html
+
+
+- Feito isso, no arquivo forms.py criar uma classe para o formulário da homepage:
+
+        from django.contrib.auth.forms import UserCreationForm
+        from .models import Usuario
+        from django import forms
+
+
+        class FormHomepage(forms.Form):                    # <====== Adicionado
+            email = forms.EmailField()                     # <====== Adicionado
+
+
+        class Criarcontaform(UserCreationForm): 
+            email = forms.EmailField()
+
+            class Meta:
+                model = Usuario
+                fields = ('username','email','password1','password2' ) 
+
+
+
+- Após criar a classe, atualizar a view de homepage no arquivo views.py:
+
+        from django.shortcuts import render, redirect, reverse
+        from .models import Filme
+        from .forms import Criarcontaform, FormHomepage                                  # <====== Adicionado FormHomepage
+        from django.views.generic import TemplateView, ListView, DetailView, FormView
+        from django.contrib.auth.mixins import LoginRequiredMixin 
+
+        # criar: url - view - html
+
+        # Create your views here.
+        class Homepage(FormView):
+            template_name = "homepage.html"
+            form_class = FormHomepage                                                   # <====== Adicionado FormHomepage ao form_class
+
+
+
+- Feito isso, ao digitar um email e clicar no botão acessar vai dar erro, pois toda vez que utilizamos um FormView 
+(coisa que utilizamos com com a class Homepage(FormView) ) ele necessita de uma função get_success_url. E depois de criar a função get_success_url
+pegar o email que o usuário digitou para verificar se esse email existe no banco de dados, se existir no banco de dados o link que vai ser passado ao usuário vai ser o link de login,
+se não existir no banco de dados o link que vai ser passado ao usuário vai ser o link do criar conta 
+Veja o arquivo views.py :
+
+        from django.shortcuts import render, redirect, reverse
+        from .models import Filme
+        from .forms import Criarcontaform, FormHomepage
+        from django.views.generic import TemplateView, ListView, DetailView, FormView
+        from django.contrib.auth.mixins import LoginRequiredMixin # <====== LoginRequiredMixin é uma classe em python que eu passo para as CBV
+
+
+        class Homepage(FormView):
+            template_name = "homepage.html"
+            form_class = FormHomepage
+            
+            def get(self, request, *args, **kwargs): 
+                if request.user.is_authenticated: 
+                    return redirect('filme:homefilmes')
+                else:
+                    return super().get(request, *args, **kwargs) 
+                
+            def get_success_url(self):                                                               # <====== Adicionado a função get_success_url
+                email = self.request.POST.get("email")                                               # <====== pega o email do formulario do tipo POST
+                return super().get_success_url()
+
+
+
+from django.shortcuts import render, redirect, reverse
+from .models import Filme, Usuario
+from .forms import Criarcontaform, FormHomepage
+from django.views.generic import TemplateView, ListView, DetailView, FormView
+from django.contrib.auth.mixins import LoginRequiredMixin 
+
+class Homepage(FormView):
+    template_name = "homepage.html"
+    form_class = FormHomepage
+    
+    def get(self, request, *args, **kwargs): 
+        if request.user.is_authenticated: # se o usuário esta autenticado
+            return redirect('filme:homefilmes') # redireciona para uma view, e não para um template | padrão ==>  redirect( APP : URL )
+        else:
+            return super().get(request, *args, **kwargs)  # redireciona o usuário para a homepage.html
+        
+    def get_success_url(self):                                                                       # <====== Adicionado a função get_success_url
+        email = self.request.POST.get("email")                                                       # <====== pega o email do formulario do tipo POST que o usuario digitou
+        usuarios = Usuario.objects.filter(email = email)                                             # <====== variavel do usuário tem que ser igual a variável email
+        if usuarios:
+            return reverse('filme:login')                                                            # <====== se a variavel usuarios existir, retorna o link do login ao usuário
+        else:
+            return reverse('filme:criarconta')                                           # <====== se a variavel usuarios NÃO existir, retorna o link do login ao usuário
 
 
 
