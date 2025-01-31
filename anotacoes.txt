@@ -1724,8 +1724,62 @@ class Homepage(FormView):
 
 
 
+=================================================================================================================================================================
+# Aula 42: Editar Perfil e Mudar senha do usuário
 
 
+- Para editar perfil tenho 2 opçoes, criar o próprio formulário ou utilizar um modelo pronto do django. Para ser mais facil vamos usar o modelo do django,
+então no arquivo views.py vamos importar um novo estilo de view que é o UpdateView.
+
+- Explicação do UpdateView: O UpdateView reconhece o modelo e a tabela que voce esta usando e automaticamente ele carrega dentro do html um formulario 
+com os campos que eu vou definir para atualizar. Veja as mudanças no arquivo views.py:
+
+        from django.shortcuts import render, redirect, reverse
+        from .models import Filme, Usuario
+        from .forms import Criarcontaform, FormHomepage
+        from django.views.generic import TemplateView, ListView, DetailView, FormView, UpdateView       # <====== Adicionado o UpdateView
+        from django.contrib.auth.mixins import LoginRequiredMixin 
+
+        (  CONTINUAÇAO DO ARQUIVO ...  )
 
 
+        class Paginaperfil(LoginRequiredMixin,UpdateView):                                              # <====== Adicionado o UpdateView
+            template_name = 'editarperfil.html'
+            
+            model = Usuario                                                                             # <====== Passar o modelo = Usuario, para poder editar o usuario 
+            fields = ['first_name','last_name', 'email']                                                # <====== No fields vai ser passado quais campos eu vou querer editar
+            
+            def get_success_url(self):                                                                  # <====== Redireciona o usuario após editar o perfil
+                return reverse('filme:homefilmes')
 
+
+- Como o django vai saber qual o usuário ele tem que editar? o django tem que editar o usuário que estiver logado, mas para conseguir redirecionar o usuario para o local correto 
+no arquivo urls.py, na opção de editar perfil tem que passar o link de uma chave primaria " <int:pk> ", veja o arquivo urls.py;
+
+
+        from django.urls import path, include, reverse_lazy                                                           # <====== Importando o reverse_lazy
+        from .views import Homefilmes, Homepage, Detalhesfilme, Pesquisafilme, Paginaperfil, Criarconta      
+        from django.contrib.auth import views as auth_view
+
+        app_name='filme'
+
+        urlpatterns = [
+            # path('', homepage), <====== Método anterior feito com function
+            # path('filmes/', homefilmes),  <====== Método anterior feito com function
+            path('', Homepage.as_view(), name='homepage'),
+            path('filmes/', Homefilmes.as_view(), name='homefilmes'),
+            path('filmes/<int:pk>', Detalhesfilme.as_view(),name='detalhesfilme'),  
+            path('pesquisa/', Pesquisafilme.as_view(), name = 'pesquisafilme'),
+            path('login/', auth_view.LoginView.as_view(template_name = 'login.html'), name='login'), 
+            path('logout/', auth_view.LogoutView.as_view(template_name = 'logout.html'), name='logout'), 
+            # path('editarperfil/', Paginaperfil.as_view(), name = 'editarperfil'),
+            path('editarperfil/<int:pk>', Paginaperfil.as_view(), name = 'editarperfil'),                              # <========== Url da pagina editar perfil recebe o id do usuário
+            path('criarconta/', Criarconta.as_view(), name="criarconta"),
+            path('mudarsenha/', auth_view.PasswordChangeView.as_view(template_name = 'editarperfil.html', success_url = reverse_lazy('filme:homefilmes')), name='mudarsenha'), # <========== Url de mudar senha recebe o 
+            ========== auth_view.PasswordChangeView ( metodo de mudar senha do django), o template_name foi definido como "editarperfil.html" para reaproveitar a estrutura dessa pagina e não precisar criar outro html,
+            ========== o success_url é a mesma coisa que a função get_success_url, só que foi passada diretamente , e o reverse é do tipo reverse_lazy, esse tipo de reverse passado tem que importar, e dentro dele foi
+            ========== passado o 'filme:homefilmes' que é o link que o usuario vai ser redirecionado após mudar a senha  
+        ]
+
+
+- Agora é possivel editar perfil e mudar a senha

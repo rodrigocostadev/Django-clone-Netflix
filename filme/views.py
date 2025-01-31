@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, reverse
 from .models import Filme, Usuario
 from .forms import Criarcontaform, FormHomepage
-from django.views.generic import TemplateView, ListView, DetailView, FormView
+from django.views.generic import TemplateView, ListView, DetailView, FormView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin # <====== LoginRequiredMixin é uma classe em python que eu passo para as CBV
 
 # criar: url - view - html
@@ -20,7 +20,7 @@ class Homepage(FormView):
     def get_success_url(self):
         email = self.request.POST.get("email") # pega o email do formulario do tipo POST
         usuarios = Usuario.objects.filter(email = email)
-        # print(email)
+        print(usuarios, email)
         if usuarios:
             return reverse('filme:login')
         else:
@@ -71,10 +71,15 @@ class Pesquisafilme(LoginRequiredMixin,ListView):
         else:
             return None
 
-
-class Paginaperfil(LoginRequiredMixin,TemplateView):
-    template_name = 'editarperfil.html'
+class Paginaperfil(LoginRequiredMixin,UpdateView):
+    template_name = 'editarperfil.html'    
+    model = Usuario
+    fields = ['first_name','last_name', 'email']
     
+    def get_success_url(self):
+        return reverse('filme:homefilmes')
+
+
 
 class Criarconta(FormView):
     template_name = 'criarconta.html'
