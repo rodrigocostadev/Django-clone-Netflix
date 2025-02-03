@@ -23,9 +23,9 @@
     <div class="w-6/12 flex flex-nowrap justify-end"> 
         {% if user.is_authenticated %}
         <div class="mr-2">
-            <form>
+            <form method="get" action="{% url 'filme:pesquisafilme' %}" >
                 {% comment %} rounded-md é a definição para bordas redondas {% endcomment %}
-                <input type="text" class="py-1 px-2 rounded-md text-black" placeholder="Pesquisar..." > 
+                <input type="text" name="query" class="py-1 px-2 rounded-md text-black" placeholder="Pesquisar..." value="{{ request.GET.query }}" > 
             </form>
         </div>
         {% endif %}

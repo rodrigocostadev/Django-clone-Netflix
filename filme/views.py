@@ -65,6 +65,7 @@ class Pesquisafilme(LoginRequiredMixin,ListView):
     
     def get_queryset(self):
         termo_pesquisa = self.request.GET.get('query')
+        print(f"teste: {termo_pesquisa}")
         if termo_pesquisa:
             object_list = self.model.objects.filter(titulo__contains=termo_pesquisa)
             return object_list
@@ -94,6 +95,13 @@ class Criarconta(FormView):
         
         # a função get_success_url espera um url como resposta e não um redirecionamento, então por isso foi usado no return reverse('filme:login')
         return reverse('filme:login')
+    
+    # ===============  TESTE ===========================
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = self.get_form()
+        return context
+        
         
     
 
