@@ -15,31 +15,7 @@ Criar Conta
                {% csrf_token %}
                 <fieldset class="form-group">
                     <legend class="border-bottom mb-4">Crie uma conta para continuar</legend>
-                   {% comment %} {{ form|crispy }} {% endcomment %}
-                   <div class="form-group">
-                    <label for="{{ form.first_name.id_for_label }}">Nome:</label>
-                    {{ form.first_name|crispy }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.last_name.id_for_label }}">Sobrenome:</label>
-                    {{ form.last_name|crispy }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.username.id_for_label }}">Usuário:</label>
-                    {{ form.username }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.email.id_for_label }}">E-mail:</label>
-                    {{ form.email }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.password1.id_for_label }}">Senha:</label>
-                    {{ form.password1 }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.password2.id_for_label }}">Confirmar Senha:</label>
-                    {{ form.password2 }}
-                </div>
+                   {{ form|crispy }}
                 </fieldset>
                 <button class="bg-red-600 py-1 px-3 text-white w-full md:text-lg rounded-md" type="submit">Criar Conta</button>
             </form>
@@ -55,17 +31,7 @@ Criar Conta
         </ul>
     </footer>
 
-{% endblock %}
-
-
-
-
-
-
-
-
-
-
+{% endblock %} 
 
 
 
@@ -90,6 +56,32 @@ Criar Conta
                 <fieldset class="form-group">
                     <legend class="border-bottom mb-4">Crie uma conta para continuar</legend>
                    {{ form|crispy }}
+
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">Nome:</label>
+                    {{ form.first_name|crispy }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Sobrenome:</label>
+                    {{ form.last_name|crispy }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Usuário:</label>
+                    {{ form.username|crispy }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">E-mail:</label>
+                    {{ form.email|crispy }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}">Senha:</label>
+                    {{ form.password1|crispy }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}">Confirmar Senha:</label>
+                    {{ form.password2|crispy }}
+                </div>
+
                 </fieldset>
                 <button class="bg-red-600 py-1 px-3 text-white w-full md:text-lg rounded-md" type="submit">Criar Conta</button>
             </form>
@@ -106,3 +98,20 @@ Criar Conta
     </footer>
 
 {% endblock %} {% endcomment %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

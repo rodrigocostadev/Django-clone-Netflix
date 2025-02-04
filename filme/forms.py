@@ -21,6 +21,7 @@ class Criarcontaform(UserCreationForm):
         # fields é uma tupla que vai dizer quais campos vão ser exibidos no formulário
         # fields = ('username','email','password1','password2' ) # o nome padrão de coloque a sua senha é: password1 , o nome padrão de confirmação de senha é password2
 
+
         fields = ('first_name','last_name','username','email','password1','password2' ) # o nome padrão de coloque a sua senha é: password1 , o nome padrão de confirmação de senha é password2
     
 
