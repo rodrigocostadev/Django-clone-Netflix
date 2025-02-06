@@ -6,18 +6,13 @@ Pesquisa de Filmes
 
 {% block content %}
     <main class='bg-primary_black min-h-screen w-full'>
-        {% comment %} <section class='bg-primary_black  min-h-screen flex flex-column justify-center py-10'> {% endcomment %}
         <section class='bg-primary_black  min-h-screen  py-10'>
-            {% comment %} <div class="p-8 w-10/12 relative align-items-center justify-content-center" > {% endcomment %}
 
               <h2 class="text-gray-200 text-3xl font-medium text-center mt-5">
                 Resultados da Busca
               </h2>
 
             <div class="p-8 w-10/12 mx-auto relative d-flex flex-column justify-content-center align-items-center" style="min-height: calc(80vh - 100px);" >
-                {% comment %} <h2 class="text-gray-200 text-2xl font-medium position-sticky top-0">
-                    Resultados da Busca
-                </h2> {% endcomment %}
                 <div class="flex flex-wrap items-center min-w-full movie_lis flex justify-center">
                   {% for filme in object_list %}
                     <div class="m-4 bg-blue-500 overflow-hidden flex-shrink-0 rounded-md cursor-pointer h-64 w-96 ">
